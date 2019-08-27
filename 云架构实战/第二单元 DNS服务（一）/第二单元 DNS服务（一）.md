@@ -115,7 +115,7 @@ Client -->hosts文件 -->DNS Service Local Cache --> DNS Server(recursion) --> S
 
 
 
-## 第二章 DNS 安装配置
+## 第二章 主DNS正向区域配置
 
 提供 DNS 服务的软件目前主流是美国伯克利加州大学研发的 BIND(Berkeley Internet Name Domain)。该项目出了 BIND 主程序外，在 Linux 平台下还提供了 chroot 与 utils 软件包，bind-chroot 软件包主要功能是让 BIND 软件可以运行在 chroot 默认下，这样 BIND 运行在相对路径的根路径，而不是 Linux 的真正根路径，即使有人对 BIND 软件进行攻击与破坏，影响的也仅仅是系统的一个子目录，不会影响整个操作系统，以此来提高系统的安全性。
 另外 **bind-utils 软件包提供了一些 DNS 查询工具，比如 dig、nslookup 等**。
@@ -162,19 +162,73 @@ Bind配置文件的结构：
 
 ③ slave: 指定一个区域为辅助域名服务器。
 
-![1566892997547](第二单元 DNS服务（一）.assets/1566892997547.png)
+默认主配置文件：
 
+```shell
+# options 为全局配置
+options {
+        # 监听端口 53 在 127.0.0.1 上
+        listen-on port 53 { 127.0.0.1; };
 
+        # 监听端口 53 在 ipv6 回环接口上
+        listen-on-v6 port 53 { ::1; };
 
-**2.区域文件：即数据库文件，所在路径 /var/named/chroot/var/named/ **
+        # 区域配置文件目录
+        directory       "/var/named";
 
-@：表示当前区域
-IN：表示区域类别，即Internet，互联网类型记录。
-TTL:用于指定其它服务器将数据在缓存中存放多长时间。86400代表秒，即24h，一般设为1天，最长为7天。
-SOA：起始授权记录，用于指出DNS服务器或当前区域的主服务器，固定格式，每个区文件中都必须存在一个唯
-一的SOA记录。
-SOA后的ns：指区域所授权的主机是ns主机
-root: 用于指定root用户邮箱
+        # 解析过的内容的缓存
+        dump-file       "/var/named/data/cache_dump.db";
+
+        # 静态缓存
+        statistics-file "/var/named/data/named_stats.txt";
+
+        # 静态缓存（内存中）
+        memstatistics-file "/var/named/data/named_mem_stats.txt";
+
+        # 允许进行DNS查询客户机的地址
+        allow-query     { localhost; };
+
+        # 是否允许客户机进行递归查询
+        recursion yes;
+
+        # 是否开启 dnssec，建议测试时关闭
+        dnssec-enable yes;
+
+        # 是否开启 dnssec 验证
+        dnssec-validation yes;
+
+        /* Path to ISC DLV key */
+        bindkeys-file "/etc/named.iscdlv.key";
+
+        # 管理密钥文件的位置
+        managed-keys-directory "/var/named/dynamic";
+};
+
+# logging 为日志
+logging {
+        # channel 定义通道名
+        channel default_debug {
+                # 日志文件 位于 /var/named/data/named.run
+                file "data/named.run";
+
+                # 控制日志级别
+                severity dynamic;
+        };
+};
+
+# 定义 区域名为"."
+zone "." IN {
+        # 类型为 根
+        type hint;
+        # 区域解析库文件名，此处为默认根服务器地址
+        file "named.ca";
+};
+
+# 扩展区域配置文件
+include "/etc/named.rfc1912.zones";
+# 根区域的 key
+include "/etc/named.root.key";
+```
 
 **2.DNS中zone文件的放置/var/named/*.zone（与named.conf中的zone对应的文件）**
 
@@ -199,7 +253,9 @@ $TTL 1D                      //用宏定义一个TTL默认值为1天,下面数�
           PTR：   反向记录
 ```
 
-### 2.3 单台DNS主服务器应用之正向解析
+
+
+### 2.3 DNS主服务器之正向解析
 
 **1.环境介绍：**
 
@@ -244,9 +300,9 @@ zone "." IN {
 	file "named.ca";
 };
 
-zone "bw.com" IN{                    //定义一个zone，zone的名字“music.com”
- type master;                                   //类型为主服务器
- file "bw.com.zone";             //自定义的域名到IP的正向解析配置
+zone "bw.com" IN{                    //定义一个zone，zone的名字“bw.com”
+ type master;                        //类型为主服务器
+ file "bw.com.zone";             	//自定义的域名到IP的正向解析配置
 };
 
 include "/etc/named.rfc1912.zones";
@@ -301,9 +357,7 @@ Address: 10.0.0.22
 
 
 
-
-
-### 2.4 单台DNS主服务器应用之CNAME
+### 2.4 DNS主服务器之CNAME别名
 
 修改配置文件/var/named/bw.com.zone
 
@@ -341,10 +395,6 @@ ruangong.bw.com	canonical name = rg.bw.com.
 Name:	rg.bw.com
 Address: 10.0.0.22
 ```
-
-
-
-
 
 
 
