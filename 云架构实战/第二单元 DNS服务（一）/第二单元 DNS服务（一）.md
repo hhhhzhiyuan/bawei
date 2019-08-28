@@ -18,13 +18,9 @@
 
 
 
-## 第一章 DNS服务概述
+## 2.1 DNS服务概述
 
-### 1.1 DNS服务概述
-
-
-
-#### 1.1.1 简介
+### 2.1.1 简介
 
 DNS 是域名系统 (Domain Name System) 的缩写，是一种组织成**域层次结构**的计算机和网络服务命名系统，它作为可以将域名和 IP 地址相互映射的一个**分布式数据库**，能够使人更方便的访问互联网，而不用去记住能够被机器直接读取的 IP 数串。
 
@@ -38,7 +34,7 @@ DNS 是域名系统 (Domain Name System) 的缩写，是一种组织成**域层�
 
 
 
-#### 1.1.2 DNS服务器分类
+### 2.1.2 DNS服务器分类
 
 1）主域名服务器（primary Name Server）
 主域名服务器是特定域所有信息的权威来源，从域管理员构造的本地文件中加载域信息，该文件包含服务器具有的部分域结构的最精确信息。主域名服务器需要配置一组完整的文件。
@@ -54,7 +50,7 @@ DNS 是域名系统 (Domain Name System) 的缩写，是一种组织成**域层�
 
 
 
-#### 1.1.3 域名层次结构
+### 2.1.3 域名层次结构
 
 DNS作为一种基础性的服务，需要相应的请求量是惊人的，为了应对海量数据的情况，便于管理，它采取了分层机构。如下图所示：
 
@@ -84,7 +80,7 @@ DNS作为一种基础性的服务，需要相应的请求量是惊人的，为�
 
 
 
-####  1.1.4 DNS原理
+###  2.1.4 DNS原理
 
 
 
@@ -98,7 +94,7 @@ Client -->hosts文件 -->DNS Service Local Cache --> DNS Server(recursion) --> S
 
 
 
-#### 1.1.5 DNS查询类型
+### 2.1.5 DNS查询方式
 
 **递归查询和迭代查询**
 
@@ -106,7 +102,7 @@ Client -->hosts文件 -->DNS Service Local Cache --> DNS Server(recursion) --> S
 
 
 
-#### 1.1.6 区域文件内各种记录类型
+### 2.1.6 区域文件内各种记录类型
 
 **常见 DNS 记录类型**
 
@@ -129,14 +125,14 @@ Client -->hosts文件 -->DNS Service Local Cache --> DNS Server(recursion) --> S
 
 
 
-## 第二章 主DNS正向区域配置
+## 2.2 主DNS正向区域配置
 
 提供 DNS 服务的软件目前主流是美国伯克利加州大学研发的 BIND(Berkeley Internet Name Domain)。该项目出了 BIND 主程序外，在 Linux 平台下还提供了 chroot 与 utils 软件包，bind-chroot 软件包主要功能是让 BIND 软件可以运行在 chroot 默认下，这样 BIND 运行在相对路径的根路径，而不是 Linux 的真正根路径，即使有人对 BIND 软件进行攻击与破坏，影响的也仅仅是系统的一个子目录，不会影响整个操作系统，以此来提高系统的安全性。
 另外 **bind-utils 软件包提供了一些 DNS 查询工具，比如 dig、nslookup 等**。
 
 
 
-### 2.1 下载安装
+### 2.2.1 下载安装
 
 ```shell
 yum -y install bind
@@ -152,7 +148,7 @@ caching-nameserver (安装高速缓存服务器配置文件,建议一定安装)�
 
 
 
-### 2.2 配置详解
+### 2.2.2 配置详解
 
 Bind配置文件的结构：
 
@@ -269,7 +265,7 @@ $TTL 1D                      //用宏定义一个TTL默认值为1天,下面数�
 
 
 
-### 2.3 DNS主服务器之正向解析
+### 2.2.3 DNS主服务器之正向解析
 
 **1.环境介绍：**
 
@@ -354,6 +350,12 @@ zone 1.0.0.127.in-addr.arpa/IN: loaded serial 0
 zone 0.in-addr.arpa/IN: loaded serial 0
 
 [root@ c6m01 named]# rndc reload
+
+rndc命令
+rndc命令为named服务的控制命令，其常用的用法有以下：
+rndc status：显示服务器状态
+rndc reload：在不停止DNS服务器工作的情况下，重新加载配置文件和区域文件
+rndc flush：清理DNS缓存
 ```
 
 **5.修改本地DNS并测试**
@@ -371,7 +373,7 @@ Address: 10.0.0.22
 
 
 
-### 2.4 DNS主服务器之CNAME别名
+### 2.2.4 DNS主服务器之CNAME别名
 
 修改配置文件/var/named/bw.com.zone
 
@@ -412,7 +414,7 @@ Address: 10.0.0.22
 
 
 
-## 第三章 域名解析常见命令
+## 2.3 域名解析常见命令
 
 DNS的查询指令：host、nslookup、dig
 
@@ -423,7 +425,7 @@ yum -y install bind-utils
 
 
 
-### 3.1 nslookup
+### 2.3.1 nslookup
 
 nslookup用于查询DNS的记录，查询域名解析是否正常，在网络故障时用来诊断网络问题
 
@@ -517,7 +519,7 @@ Address: 39.156.69.79
 
 
 
-### 3.2 dig
+### 2.3.2 dig
 
 dig命令是常用的域名查询工具，可以用来测试域名系统工作是否正常
 
