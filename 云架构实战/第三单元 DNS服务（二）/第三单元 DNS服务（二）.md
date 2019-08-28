@@ -71,11 +71,25 @@ wg.com.	IN	A	172.18.9.7
 
 ## 3.2 反向区域的资源记录
 
+### 3.2.1 PTR记录--反向解析
+
+**在主配置文件中定义区域**
+vim /etc/named.conf 中 添加如下内容。通常反向解析区域名，约定俗成的规则为该 网络地址反写 拼接 “.in-addr.arpa”，如下
+
+```shell
+zone "0.0.10.in-addr.arpa" IN {
+        type master;
+        file "10.0.0.zone";
+};
+```
 
 
 
+**定义区域解析库文件**
+在 /var/named/ 目录下，创建10.0.0.zone，解析库文件 
+`/var/named/10.0.0.zone` 中添加如下内容
 
-
+$TTL 86400
 
 
 
