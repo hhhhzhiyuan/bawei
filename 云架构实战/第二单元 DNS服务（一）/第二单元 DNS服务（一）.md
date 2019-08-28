@@ -146,7 +146,7 @@ yum -y install bind
 chkconfig named on			#添加开机自启
 ss -lntp|grep named			#查看bind端口
 
-# DNS默认使用UDP、TCP协议，使用端口为53（domain），953（mdc，远程控制使用）
+# DNS默认使用UDP、TCP协议，使用端口为53（客户端查询），953（主从服务器同步）
 bind-chroot 安装bind-chroot软件，将DNS服务锁定在指定的工作目录，安全
 bind-utils (安装DNS查询工具软件， 提供nslookup及dig等测试工具，默认桌面版已经安装)
 caching-nameserver (安装高速缓存服务器配置文件,建议一定安装)（有的版本不需要）
@@ -165,7 +165,13 @@ Bind配置文件的结构：
 | zone文件的默认路径 | /var/named               |
 
 **1.DNS主配置文件 /etc/named.conf**
-注：options：定义全局配置选项。用于定义BIND服务器的工作目录
+
+options  :对全局生效,定义了监听地址和端口,目录,临时目录,状态目录等配置信息
+
+logging : 日志信息
+
+zone  : 针对某个区域生效
+
 注意：在配置时要用“{}”括起来，用“；”结束，并且大括号和分号之间要有空格分开。
 
 **区域类型**：type：用来定义一个区域的类型。
