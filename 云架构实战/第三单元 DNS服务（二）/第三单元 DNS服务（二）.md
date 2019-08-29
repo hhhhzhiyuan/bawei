@@ -74,7 +74,7 @@ wg.com.	IN	A	172.18.9.7
 ### 3.2.1 PTR记录--反向解析
 
 **在主配置文件中定义区域**
-vim /etc/named.conf 中 添加如下内容。通常反向解析区域名，约定俗成的规则为该 网络地址反写 拼接 “.in-addr.arpa”，如下
+vim /etc/named.conf 中 添加如下内容。通常反向解析区域名，约定俗成的规则为该网络地址反写拼接 “.in-addr.arpa”，如下
 
 ```shell
 zone "0.0.10.in-addr.arpa" IN {
@@ -89,7 +89,49 @@ zone "0.0.10.in-addr.arpa" IN {
 在 /var/named/ 目录下，创建10.0.0.zone，解析库文件 
 `/var/named/10.0.0.zone` 中添加如下内容
 
+```shell
+[root@ c6m01 named]# cat 0.0.10.zone
 $TTL 86400
+$ORIGIN 0.0.10.in-addr.arpa.
+@       IN      SOA     www.bw.com.   admin.bw.com. (
+        2017011301
+        1H
+        5M
+        7D
+        1D
+)
+       IN      NS      www.bw.com.
+22     IN      PTR     www.bw.com.
+```
+
+
+
+**检查语法重启bind服务**
+
+```shell
+[root@ c6m01 ~]# named-checkconf -z
+zone bw.com/IN: loaded serial 0
+zone 0.0.10.in-addr.arpa/IN: loaded serial 2017011301
+zone localhost.localdomain/IN: loaded serial 0
+zone localhost/IN: loaded serial 0
+zone 1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa/IN: loaded serial 0
+zone 1.0.0.127.in-addr.arpa/IN: loaded serial 0
+zone 0.in-addr.arpa/IN: loaded serial 0
+[root@ c6m01 ~]# echo $?
+0
+[root@ c6m01 ~]# /etc/init.d/named restart
+```
+
+**测试反向解析**
+
+```shell
+[root@ c6m01 ~]# nslookup 10.0.0.22
+Server:		10.0.0.21
+Address:	10.0.0.21#53
+
+22.0.0.10.in-addr.arpa	name = www.bw.com.
+```
+
 
 
 

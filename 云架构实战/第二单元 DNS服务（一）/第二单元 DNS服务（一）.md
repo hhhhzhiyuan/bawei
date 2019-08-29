@@ -156,13 +156,14 @@ caching-nameserver (安装高速缓存服务器配置文件,建议一定安装)�
 
 ### 2.2.2 配置详解
 
-Bind配置文件的结构：
+Bind服务的结构及含义：
 
-| 主程序             | /usr/sbin/named          |
-| ------------------ | ------------------------ |
-| 主配置文件         | /etc/named.conf          |
-| 区域配置文件       | /etc/named.rfc1912.zones |
-| zone文件的默认路径 | /var/named               |
+| 主要配置                              | 含义                                             |
+| ------------------------------------- | ------------------------------------------------ |
+| 主程序  （/usr/sbin/named）           | 程序启动时运行的服务                             |
+| 主配置文件（/etc/named.conf)          | 主要用来定义bind服务程序的运行                   |
+| 区域配置文件(/etc/named.rfc1912.zone) | 用来保存域名和IP地址对应关系的所在位置           |
+| 数据配置文件目录(/var/named)          | 用来保存域名和IP地址真实的对应关系的数据配置文件 |
 
 **1.DNS主配置文件 /etc/named.conf**
 
@@ -368,6 +369,8 @@ rndc命令为named服务的控制命令，其常用的用法有以下：
 rndc status：显示服务器状态
 rndc reload：在不停止DNS服务器工作的情况下，重新加载配置文件和区域文件
 rndc flush：清理DNS缓存
+
+注意：rndc reload重新加载时，只能重载file "bw.com.zone";。当/etc/named.conf主配置文件发生变化时，一定要重启named服务。
 ```
 
 **5.修改本地DNS并测试**
@@ -428,7 +431,7 @@ Address: 10.0.0.22
 
 ## 2.3 域名解析常见命令
 
-DNS的查询指令：host、nslookup、dig
+DNS的查询指令：host、nslookup、dig等
 
 ```shell
 #安装dig nslookup
@@ -546,7 +549,7 @@ dig命令是常用的域名查询工具，可以用来测试域名系统工作�
 -x<IP地址>：执行逆向域名查询；
 ```
 
-1.查看域名的A记录
+**1.查看域名的A记录**
 
 ```shell
 [root@ c6m01 ~]# dig baidu.com
@@ -570,7 +573,7 @@ baidu.com.		351	IN	A	220.181.38.148
 ;; MSG SIZE  rcvd: 59
 ```
 
-2.查看域名的ip
+**2.查看域名的ip**
 
 ```
 [root@ c6m01 ~]# dig baidu.com +short
@@ -578,7 +581,7 @@ baidu.com.		351	IN	A	220.181.38.148
 39.156.69.79
 ```
 
-3.查看域名的MX 记录
+**3.查看域名的MX 记录**
 
 ```shell
 [root@ c6m01 ~]# dig baidu.com mx
@@ -605,7 +608,7 @@ baidu.com.		733	IN	MX	20 mx50.baidu.com.
 ;; MSG SIZE  rcvd: 143
 ```
 
-4.查询域名的TTL记录
+**4.查询域名的TTL记录**
 
 ```shell
 [root@ c6m01 ~]# dig baidu.com ttl
