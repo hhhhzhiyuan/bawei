@@ -45,6 +45,7 @@ DNS 是域名系统 (Domain Name System) 的缩写，是一种组织成**域层�
 辅助域名服务器用来从主域名服务器中转移一整套域信息，它是可选的配置选项。区文件从主域名服务器转移出来，作为磁盘文件保存在辅助域名服务器中。辅助域名服务器不需要配置本地区文件，只需要配置主配置文件(named.conf)，高速缓存初始化文件(named.ca)和回送文件(named.local)。
 
 
+
 3）唯高速缓存域名服务器（Cache-only Server）
 不包含域名数据库，它每次从某台远程服务器取得域名服务器查询的信息。一旦取得一个回答，就将它放入高速缓存中，下次查询相同的信息就用此回答。
 
@@ -173,7 +174,7 @@ logging : 日志信息
 
 zone  : 针对某个区域生效
 
-注意：在配置时要用“{}”括起来，用“；”结束，并且大括号和分号之间要有空格分开。
+注意：在配置时要用“{}”括起来，用“；”结束。
 
 **区域类型**：type：用来定义一个区域的类型。
 
@@ -287,7 +288,7 @@ $TTL 1D                      //用宏定义一个TTL默认值为1天,下面数�
 10.0.0.22	www.bw.com需要解析到的服务器
 ```
 
-**2.修改配置文件**
+**2.修改主配置文件**
 
 ```shell
 [root@ c6m01 named]# cat /etc/named.conf
@@ -335,10 +336,12 @@ include "/etc/named.root.key";
 **3.创建正向解析文件:**
 创建并编辑正向解析文件bw.com.zone(文件名要和name.conf文件中定义的zone file名一致)
 
+cp -p  #赋值并保持属性
+
 ```shell
 cp -p /var/named/named.localhost /var/named/bw.com.zone
 
-[root@ c6m01 named]# cat /var/named/bw.com.zone
+[root@ c6m01 named]# vim /var/named/bw.com.zone
 $TTL 1D
 @       IN SOA  bw.com. email.com. (
                                         0       ; serial
@@ -362,6 +365,8 @@ zone 1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.ip6.arpa/IN
 zone 1.0.0.127.in-addr.arpa/IN: loaded serial 0
 zone 0.in-addr.arpa/IN: loaded serial 0
 
+
+#配置重载
 [root@ c6m01 named]# rndc reload
 
 rndc命令
@@ -406,6 +411,9 @@ master  IN  A    10.0.0.21
 www     IN  A    10.0.0.22
 rg      IN  A    10.0.0.22
 ruangong      IN  CNAME    rg
+aaaa		  IN  CNAME    rg
+
+[root@ c6m01 named]# rndc reload
 ```
 
 测试
