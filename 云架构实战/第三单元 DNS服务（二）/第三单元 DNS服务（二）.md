@@ -67,6 +67,20 @@ wg.com.	IN	A	172.18.9.7
 
 3.可以让直接输入网址登陆网站的用户输入简洁的网址即可访问网站
 
+```
+*.baidu.com
+
+mail.baidu.com
+
+www.baidu.com
+
+oa.baidu.com
+```
+
+
+
+
+
 
 
 ## 3.2 反向区域的资源记录
