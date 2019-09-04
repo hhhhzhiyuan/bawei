@@ -74,15 +74,14 @@ LISTEN     0      128                      :::80                      :::*      
 
 ### 5.2.3 httpd程序环境
 
-| 文件/目录                        | 对应的功能   |
-| -------------------------------- | ------------ |
-| /var/log/httpd/access.log        | 访问日志     |
-| /var/log/httpd/error_log         | 错误日志     |
-| /var/www/html/                   | 站点文档目录 |
-| /usr/lib64/httpd/modules/        | 模块文件路径 |
-| /etc/httpd/conf/httpd.conf       | 主配置文件   |
-| /etc/httpd/conf.modules.d/*.conf | 模块配置文件 |
-| /etc/httpd/conf.d/*.conf         | 辅助配置文件 |
+| 文件/目录                  | 对应的功能   |
+| -------------------------- | ------------ |
+| /var/log/httpd/access.log  | 访问日志     |
+| /var/log/httpd/error_log   | 错误日志     |
+| /var/www/html/             | 站点目录     |
+| /usr/lib64/httpd/modules/  | 模块文件路径 |
+| /etc/httpd/conf/httpd.conf | 主配置文件   |
+| /etc/httpd/conf.d/*.conf   | 辅助配置文件 |
 
 ### 5.2.4 常见配置及参数详解
 
@@ -97,6 +96,24 @@ DirectoryIndex index.html index.html.var	#默认网站主页
 Include conf.d/*.conf			#读取/etc/httpd/conf/conf.d/目录中所有以.conf结尾的文件
 ServerName www.wg.com			#域名
 ServerAdmin						#设置管理员的邮箱
+Include conf.d/*.conf			#包含的子配置文件
+User apache						#用户是apache
+Group apache					#用户组是apache
+Directory 						#认证授权和访问控制
+
+
+##################################3
+<IfModule prefork.c>     #当httpd服务使用的profork模型的时候：
+ StartServers      10    #默认启动10个作业进程
+ MinSpareServers    10    #空闲进程数不低于10个
+ MaxSpareServers    20    #空闲进程数最大20个
+ ServerLimit      256    #最多可以启动256个进程
+ MaxClients       256    #最大并发客户端数为256个
+ MaxRequestsPerChild 4000 #每个进程可以处理4000个请求，超过此数目进程被杀死并重新创建
+</IfModule>
+
+
+需要注意的是：ServerLimit最大值为20000个，并且：由于profork是单一线程的进程，所以每个进程在同一时间里仅能处理一个请求(也就是一个请求一个进程)，所以MaxClients的值要和ServerLimit一致。而且，profork的开销比较大，不过稳定性比较强。
 ```
 
 
@@ -113,7 +130,7 @@ httpd启动后，通过浏览器访问：http://10.0.0.21:80
 
 ### 5.3.2 elinks命令
 
-elinks指令是一个纯文本格式的浏览器，支持颜色、表格、鼠标、菜单操作。
+elinks指令是一个**纯文本格式**的浏览器，支持颜色、表格、鼠标、菜单操作。
 
 此命令的适用范围：RedHat、RHEL、Ubuntu、CentOS、Fedora。
 
@@ -235,7 +252,7 @@ Finished 1000 requests
 **UV(独立访客)**：即Unique Visitor,访问您网站的一台电脑客户端为一个访客。00:00-24:00内相同的客户端只被计算一次。
 
 **扩展资料**
-网站访问量的衡量标准一个是独立IP（即UV），另一个是PV，常以日为标准，即日独立IP和日PV来计算。一台电脑上网即为一个独立IP。PV即Page View的缩写，即页面浏览量，一个独立IP可以产生多个PV，所以PV个数>=独立IP个数。
+网站访问量的**衡量标准一个是独立IP（即UV）**，另一个是PV，常以日为标准，即日独立IP和日PV来计算。一台电脑上网即为一个独立IP。PV即Page View的缩写，即页面浏览量，一个独立IP可以产生多个PV，所以PV个数>=独立IP个数。
 访问次数就相当于一个展览会的访问人次，某个参观者出入展馆10次的话，这10次都被记入访问次数中，相当于网络中的PV值。
 
 独立访客数则相当于带身份证参观展览会的访问人数，每一个出示身份证参观展览的人，无论出入几次，都只计作一次独立访问。这里所说的“身份证”，在网络上就是访客的IP地址。
@@ -276,7 +293,7 @@ Finished 1000 requests
 
 **tcp/ip四次挥手**
 
-![img](assets/clipboard.png)
+![img](assets/clipboard-1567578015573.png)
 
 
 
