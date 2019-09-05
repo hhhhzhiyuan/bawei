@@ -30,69 +30,23 @@ Apache虚拟主机的实现方式有3种。
 
 
 
-6.1.3 VirtualHost参数的意义	
+### 6.1.3 VirtualHost参数的意义	
 
+```shell
+<VirtualHost *:80>			#服务器ip和端口
+    DocumentRoot "/project/code/public/www"	 #站点目录
+    ServerName www.cq.com	#域名
+    ServerAlias 			#给虚拟主机增加多个域名，上面网址的别名
 
-
-```
-<VirtualHost *:80>
-    #文档的根目录
-    DocumentRoot "D:\phpStudy\WWW\cq"
-    #域名
-    ServerName www.cq.com
-    ServerAlias 
-    #配置rewrite相关选项
-  <Directory "D:\phpStudy\WWW\cq">
-      Options FollowSymLinks ExecCGI
-	  #是否启用rewrite
-      AllowOverride All 
-      Order allow,deny
-	  #是否显示列表 （在发布项目后一般是不启用，对于这个配置，针对DocumentRoot在apachede的默认文件夹外的目录生效。比如下面的例一 ）
-      Options +indexes 
+  <Directory "/project/code/public/www">	#对根目录行为的限制
+      Options FollowSymLinks ExecCGI	#followsymlinks表示允许使用符号链接，默认为禁用
+      AllowOverride None 	 #表示禁止用户对目录配置文件(.htaccess进行修改)重载，普通站点不建议开启
+      Order allow,deny		#是否显示列表 （在发布项目后一般是不启用，对于这个配置，针对DocumentRoot在apachede的默认文件夹外的目录生效。比如下面的例一 ）
       Allow from all
-	  #拒绝所有的访问
-      #Deny from all  
+      #Deny from all  	#拒绝所有的访问
       Require all granted
   </Directory>
 </VirtualHost
-
-
-
-<VirtualHost *:80>								#服务器ip和端口
-    DocumentRoot "/project/code/public/www"	    #站点目录
-    ServerName www.bw.com				#访问域名 
-    ServerAlias bw.com				#给虚拟主机增加多个域名，上面网址的别名
-    
-    # AddType application/x-httpd-php .htm  #添加可以执行php的文件类型，为shtml文件开启SSI，使浏览器能解析，不至于直接输出代码就是指.htm可以解析php
-
-    AddType text/html .shtml
-
-    #为.shtml开启包含（include），在.shtml文件中（如<!--include ……-->）可以引入文件
-
-    AddOutputFilter INCLUDES .shtml
-
-    #映射URL到文件系统的特定区域
-
-    Alias /widget/ E:/project/cankao/code/public/www/widget/
-    Alias /section/ E:/project/cankao/code/public/www/section/
-
-    #权限设置，标签中的地址是相对于DocumentRoot的
-
-    <Directory "/">
-
-        参数设置Indexes开启索引，可以在浏览器中显示当前目录文件列表。一般框架中因后台模板不是html的后台虚拟主机不加Includes
-
-        Options -Indexes FollowSymLinks Includes
-
-        #查找打开文件和顺序
-
-        DirectoryIndex index.shtml index.html
-
-        #权限
-
-        Allow from all
-    </Directory>
-</VirtualHost>
 ```
 
 
@@ -119,6 +73,10 @@ vim /etc/httpd/conf/httpd.conf
 
 ### 6.2.1 配置基于IP的虚拟主机
 
+将不同的网站挂在不同的IP上,访问不同的IP,所看到的是不同网站.因为一般服务器没那么多公网IP,而且大家一般都是用域名访问的。所以这个几乎没用。但是考试会考。
+
+
+
 #### 6.2.1.1 为主机添加多个IP
 
 ```shell
@@ -127,22 +85,25 @@ ip a
 
 #手动添加ip（注意添加的ip必须与虚机属于同一网络段L）
 ip addr add 10.0.0.30/24 dev eth0
+或者
+ifconfig eth0:0 10.0.0.30
 ```
+
+
 
 #### 6.2.1.2 添加虚拟主机配置文件
 
 ```shell
 cd /etc/httpd/conf.d/
+
 vim virtualhost.conf
 #基于IP的虚拟主机配置
 <VirtualHost 10.0.0.21:80>
   DocumentRoot "/var/www/bw"
-  ServerName    www.bw.com
 </VirtualHost>
 
 <VirtualHost 10.0.0.30:80>
   DocumentRoot "/var/www/wg"
-  ServerName    www.wg.com
 </VirtualHost>
 
 
@@ -157,6 +118,16 @@ echo 'this is wg' >>/var/www/wg/index.html
 
 **测试访问：**
 
+```shell
+/etc/init.d/httpd restart
+
+[root@ c6m01 conf.d]# elinks -source 10.0.0.21:80
+this is bw
+
+[root@ c6m01 conf.d]# elinks -source 10.0.0.30:80
+this is wg
+
+```
 
 
 
@@ -164,6 +135,122 @@ echo 'this is wg' >>/var/www/wg/index.html
 
 
 
+## 6.3 基于端口的虚拟主机
+
+通过访问同一个IP(或者域名)的不同端口来访问到不同的文件
+
+
+
+### 6.3.1 配置基于端口的虚拟主机
+
+**在主配置文件添加监听端口**
+
+```shell
+#修改主配置文件
+vim /etc/httpd/conf/httpd.conf 
+#在原有行Listen 80行的基础上， 在添加一行
+Listen 80
+Listen 81
+
+
+#修改虚拟主机配置文件
+cd /etc/httpd/conf.d/
+vim virtualhost.conf
+#基于IP的虚拟主机配置
+<VirtualHost 10.0.0.21:80>
+  DocumentRoot "/var/www/bw"
+</VirtualHost>
+
+<VirtualHost 10.0.0.30:80>
+  DocumentRoot "/var/www/wg"
+</VirtualHost>
+
+
+#基于端口的虚拟主机配置
+<VirtualHost 10.0.0.21:81>
+  DocumentRoot "/var/www/bw"
+</VirtualHost>
+```
+
+**测试访问：**
+
+```shell
+/etc/init.d/httpd restart
+
+[root@ c6m01 conf.d]# elinks -source 10.0.0.21:80
+this is bw
+
+[root@ c6m01 conf.d]# elinks -source 10.0.0.21:81
+this is bw
+```
+
+
+
+
+
+## 6.4 基于域名的虚拟主机
+
+这是一种最通用的情况,已经给服务器设置了多个域名，然后希望访问不同的域名来访问不同的网站文件。
+
+
+
+### 6.4.1 配置基于域名的虚拟主机
+
+```shell
+cd /etc/httpd/conf.d/
+vim virtualhost.conf
+#基于IP的虚拟主机配置
+<VirtualHost 10.0.0.21:80>
+  DocumentRoot "/var/www/bw"
+  ServerName    www.bw.com		#此处添加ServerName并配置域名
+</VirtualHost>
+
+<VirtualHost 10.0.0.30:80>
+  DocumentRoot "/var/www/wg"		#此处添加ServerName并配置域名
+  ServerName    www.wg.com
+</VirtualHost>
+
+#基于IP的虚拟主机配置
+<VirtualHost 10.0.0.21:80>
+  DocumentRoot "/var/www/bw"
+</VirtualHost>
+
+<VirtualHost 10.0.0.30:80>
+  DocumentRoot "/var/www/wg"
+</VirtualHost>
+
+
+#基于端口的虚拟主机配置
+<VirtualHost 10.0.0.21:81>
+  DocumentRoot "/var/www/bw"
+</VirtualHost>
+```
+
+
+
+### 6.4.2 添加本地hosts解析并测试
+
+```shell
+vim /etc/hosts
+
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+10.0.0.21 www.bw.com
+10.0.0.30 www.wg.com
+```
+
+**测试访问域名：**
+
+```shell
+/etc/init.d/httpd restart
+
+[root@ c6m01 conf.d]# elinks -source www.bw.com
+this is bw
+
+[root@ c6m01 conf.d]# elinks -source www.wg.com
+this is wg
+
+```
 
 
 
@@ -171,12 +258,3 @@ echo 'this is wg' >>/var/www/wg/index.html
 
 
 
-
-
-6.3 基于端口的虚拟主机
-
-6.3.1 配置基于端口的虚拟主机
-
-6.4 基于域名的虚拟主机
-
-6.4.1 配置基于域名的虚拟主机
