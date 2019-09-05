@@ -12,7 +12,7 @@
 
 
 
-## 7.1LAMP架构概述
+## 7.1 LAMP架构概述
 
 ### 7.1.1 LAMP动态网站架构组成
 
@@ -49,7 +49,8 @@ lamp的全称是linux+apache+mysql+php
     由此可知，要实现LAMP在配置每一个服务时，安装功能需求进行配置，即可实现LAMP的架构，当然apache、mysql和php服务都可配置为独立服务，安装在不同服务器之上。
 
 
-## 7.3 RPM包搭建LAMP架构
+
+## 7.2 RPM包搭建LAMP架构
 
 ### 7.2.1 RPM搭建LAMP所需软件包
 
@@ -71,7 +72,7 @@ yum makecache
 3.yum安装
 
 ```shell
-yum install httpd php php-mysql mysql-server -y
+yum install mysql mysql-server php php-mysql php-fpm httpd -y
 ```
 
 4.下载rpm包到本地
@@ -85,11 +86,17 @@ sz *
 
 
 
-
-
 ### 7.2.2 开启mysql服务
 
+```shell
+/etc/init.d/mysqld start
 
+在刚安装好的mysql默认进入是没有密码的直接在终端中输入：mysql 就可以登录，但是为了保证其安全性，可以修改其密码
+#登录数据库
+mysql
+#mysql数据库登录密码
+/usr/bin/mysqladmin -u root password '123456'
+```
 
 
 
@@ -101,7 +108,37 @@ sz *
 
 7.3.1 添加支持php应用
 
+```
+vim /etc/http/conf/httpd.conf
+在DirectoryIndex index.html后添加加index.php #支持php
+添加AddType application/x-httpd-php .php   #支持php应用
+```
+
+
+5.编辑默认主页
+
+```
+
+```
+
+6.测试LAMP
+
+
+
+
+
+
+
+
+
 7.3.2 设置默认php主页
+
+```
+vim /var/www/html/index.php
+<?
+php phpinfo();
+?>
+```
 
 
 
@@ -111,7 +148,10 @@ sz *
 
 ## 7.5 创建php测试页面	
 
-7.4.1 编写php测试页面index.php
+```
+vim /var/www/html/index.php
+<?php phpinfo(); ?>
+```
 
 
 
@@ -137,4 +177,4 @@ sz *
 
 
 
-## 7.7    SVN服务搭建 +apache实现 基于http访问的svn器及权限管理
+## 7.7 SVN服务搭建 +apache实现 基于http访问的svn器及权限管理

@@ -261,7 +261,62 @@ this is wg
 
 
 
+## 6.5 认证授权和访问控制
+
+**ip访问控制：**
+目录控制语句以<Directory 目录名>开头；以</Directory>结束。
+先允许后拒绝，默认拒绝所有：Order allow,deny
+先拒绝后允许，默认允许所有：Order deny,allow
+AllowOverride None：不允许覆盖，即不允许从根目录向子目录覆盖。即默认情况下拒绝从根目录下向子目录访
+问，如果要看根目录下的一个子目录，必须先打开子目录的访问权限。
+Order allow，deny：访问控制的顺序，先匹配允许，再匹配拒绝，默认拒绝。
+Allow from all：表示允许任何地址访问。
+Allow from 172.18.49.0/24
+Deny from 172.18.49.102
+
+**用户身份认证授权**
+
+主要参数：
+
+```
+Authtype 		是认证类型 Basic apache自带的基本认证
+Authname 		认证名字，是提示你输入密码的对话框的提示语
+Authuserfile 	是存放认证用户的文件
+require user 	用户名 允许指定的一个或多个用户访问，如果认证文件里面还有其他用户，还是不能访问
+require valid-user 所有认证文件里面的用户都可以访问
+require group 		组名 授权给一个组，较少用
+```
+
+配置：
+
+```
+useradd tom
+htpasswd -c /etc/httpd/webpasswd tom
+
+cd /etc/httpd/conf.d
+vim virtualhost.conf
+#基于IP的虚拟主机配置
+<VirtualHost 10.0.0.21:80>
+  DocumentRoot "/var/www/bw"
+  ServerName    www.bw.com
+  <Directory /var/www/bw>
+  AuthType Basic
+  AuthName Password
+  AuthUserFile /etc/httpd/webpasswd
+  require user tom
+  </Directory>
+</VirtualHost>
+```
 
 
 
+![1567671235083](assets/1567671235083.png)
+
+
+
+绑定windows下hosts
+
+**测试：www.bw.com**
+
+![1567672000036](assets/1567672000036.png)
 

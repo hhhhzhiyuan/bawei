@@ -94,9 +94,32 @@ elinks -source www.bw.com
 elinks -source www.wg.com
 
 
+####认证授权和访问控制####
+useradd tom
+htpasswd -c /etc/httpd/webpasswd tom
 
+cd /etc/httpd/conf.d
+vim virtualhost.conf
+#基于IP的虚拟主机配置
+<VirtualHost 10.0.0.21:80>
+  DocumentRoot "/var/www/bw"
+  ServerName    www.bw.com
+  <Directory /var/www/bw>
+  AuthType Basic
+  AuthName Password
+  AuthUserFile /etc/httpd/webpasswd
+  require user tom
+  </Directory>
+</VirtualHost>
 
+#重启
+/etc/init.d/httpd restart
 
+#测试访问（会让用户输入账号密码）
+elinks www.bw.com
+或者
+绑定windows的hosts
+谷歌浏览器访问：www.bw.com
 
 
 
