@@ -57,18 +57,23 @@ event：基于事件驱动，一个进程响应多个请求
 软件包名和服务名都是：`httpd`
 
 ```shell
-[root@ c6m01 pub]# yum -y install httpd		#安装
+#安装
+[root@ c6m01 pub]# yum -y install httpd		
 
-[root@ c6m01 pub]# /etc/init.d/httpd start		#启动
+#启动
+[root@ c6m01 pub]# /etc/init.d/httpd start		
 Starting httpd:
 httpd: Could not reliably determine the server's fully qualified domain name, using 127.0.0.1 for ServerName
-#以上问题需要编辑httpd.conf文件，搜索"#ServerName"，添加ServerName localhost:80
+#以上问题需要编辑httpd.conf文件，搜索"#ServerName"，添加ServerName IP:80
 
-[root@ c6m01 pub]# chkconfig httpd on		#设置开机自启
+#设置开机自启
+[root@ c6m01 pub]# chkconfig httpd on		
 
-[root@ c6m01 pub]# ps -ef|grep httpd		#查看httpd进程
+#查看httpd进程
+[root@ c6m01 pub]# ps -ef|grep httpd		
 
-[root@ c6m01 pub]# ss -lntp|grep 80			#查看httpd端口号
+#查看httpd端口号
+[root@ c6m01 pub]# ss -lntp|grep 80			
 LISTEN     0      128                      :::80                      :::*      users:
 ```
 
