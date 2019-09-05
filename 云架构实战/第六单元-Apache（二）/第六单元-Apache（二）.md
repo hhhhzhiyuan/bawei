@@ -204,7 +204,7 @@ this is bw
 ```shell
 cd /etc/httpd/conf.d/
 vim virtualhost.conf
-#基于IP的虚拟主机配置
+#基于域名拟主机配置
 <VirtualHost 10.0.0.21:80>
   DocumentRoot "/var/www/bw"
   ServerName    www.bw.com		#此处添加ServerName并配置域名
