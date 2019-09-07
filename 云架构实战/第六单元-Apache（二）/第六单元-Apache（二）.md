@@ -47,7 +47,7 @@ Apache虚拟主机的实现方式有3种。
       Require all granted
   </Directory>
   
-</VirtualHost
+</VirtualHost>
 ```
 
 

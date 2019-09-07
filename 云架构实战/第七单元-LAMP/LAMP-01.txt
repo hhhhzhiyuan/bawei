@@ -52,6 +52,10 @@ phpinfo();
 
 #启动数据库
 service mysqld start
+
+#默认是可以直接登录的
+mysql
+
 数据库存放的目录：/var/lib/mysql/
 #设置mysql登录密码
 mysqladmin -u root password '123456'
