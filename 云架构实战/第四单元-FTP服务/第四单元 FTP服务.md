@@ -301,19 +301,54 @@ local_max_rate=0			#本地用户最大传输速率（字节）。0为不限制
 ### 4.4.1 Linux下FTP客户端
 
 ```shell
-yum install -y ftp
+1. yum install -y lftp
 
 在linux端使用ftp或者lftp命令登录vsftpd服务
-常用命令：
-ls  	列出ftp服务的文件列表
-cd		在ftp服务器上切换目录
-lcd		切换本地目录
-get		下载文件
-put		上传文件
-mkdir	创建文件夹
-rm		删除文件
-rmdir   删除服务器指定目录
+lftp使用介绍
+lftp 是一个功能强大的下载工具，它支持访问文件的协议: ftp, ftps, http, https, hftp, fish.(其中ftps和https需要在编译的时候包含openssl库)。lftp的界面非常想一个shell: 有命令补全，历史记录，允许多个后台任务执行等功能，使用起来非常方便。它还有书签、排队、镜像、断点续传、多进程下载等功能。
+
+2. lftp登录：
+
+lftp ftp://user:password@site:port 
+lftp user:password@site:port 
+lftp site -p port -u user,password 
+lftp site:port -u user,password
+
+3. lftp常用命令：
+ls  	显示远端文件列表(!ls 显示本地文件列表)。 
+cd  	切换远端目录(lcd 切换本地目录)。 
+get 	下载远端文件。 
+mget 	下载远端文件(可以用通配符也就是 *)。 
+pget 	使用多个线程来下载远端文件, 预设为五个。 
+mirror 	下载/上传(mirror -R)/同步 整个目录。 
+put 	上传文件。 
+mput 	上传多个文件(支持通配符)。 
+mv 		移动远端文件(远端文件改名)。 
+rm 		删除远端文件。 
+mrm 	删除多个远端文件(支持通配符)。 
+mkdir 	建立远端目录。 
+rmdir 	删除远端目录。 
+pwd 	显示目前远端所在目录(lpwd 显示本地目录)。 
+du 		计算远端目录的大小 
+! 		执行本地 shell的命令(由于lftp 没有 lls, 故可用 !ls 来替代) 
+lcd 	切换本地目录 
+lpwd 	显示本地目录 
+alias 	定义别名 
+bookmark 	设定书签。 
+exit 		退出ftp
 ```
+
+注意点：
+
+1. ftp只能上传和下载文件，不能对文件夹进行操作，如果想上传/下载文件夹需要进行压缩/解压缩操作
+
+2. ftp服务器登录通常使用匿名登录方式(用户名：anonymous，匿名用户只能在指定目录范围内登录)
+
+3. lftp第三方ftp客户端，可以进行目录操作
+
+![1567869702118](assets/1567869702118.png)
+
+
 
 
 
