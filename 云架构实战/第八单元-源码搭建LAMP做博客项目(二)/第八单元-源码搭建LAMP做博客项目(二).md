@@ -247,7 +247,7 @@ define('DB_NAME', 'wordpress');			#修改这里
 define('DB_USER', 'root');				#修改这里
  
 /** MySQL数据库密码 */
-define('DB_PASSWORD', '123456');		#修改这里位数据库密码
+define('DB_PASSWORD', '123456');		#修改这里为数据库密码
  
 /** MySQL主机 */
 define('DB_HOST', 'localhost');
