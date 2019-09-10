@@ -18,6 +18,10 @@ Nginx (engine x) 是一个轻量的，高性能的HTTP和反向代理服务器�
 
 
 
+**nginx和apache对比？？？**
+
+
+
 
 
 ## 9.2 编译安装nginx
@@ -105,7 +109,7 @@ root       4254   1763  0 11:27 pts/3    00:00:00 grep --color=auto nginx
 [root@ c6m01 ~]# nginx -s reload		#当子配置文件发生变化，重新载入配置文件
 ```
 
-
+![1568001102860](assets/1568001102860.png)
 
 ## 9.3 目录结构和主要配置参数
 
@@ -121,13 +125,14 @@ root       4254   1763  0 11:27 pts/3    00:00:00 grep --color=auto nginx
 (1)user  nginx;  #配置运行nginx的用户
 (2)worker_processes  2; #初始的子进程数量
 (3)worker_connections  1024; #配置单个进程处理的最大请求连接数
-(4)server{}  #配置虚拟主机
+(4)server{  #配置虚拟主机
 (5)listen	#配置虚拟主机监听端口
 (6)server_name #配置服务器域名
 (7)location  匹配规则 { }   #配置匹配特定的url
 (8)root   #配置网站根目录
 (9)index  #配置虚拟主机的默认首页
 (10)error_page  404              /404.html; #解释：当出现404的时候，要重定向到网站根目录下的404.html页面
+}
 ```
 
 **location匹配规则**
@@ -149,15 +154,25 @@ root       4254   1763  0 11:27 pts/3    00:00:00 grep --color=auto nginx
 
 ```shell
 server {
-	listen 80; 
-	root /www/wg;
+    listen       80;
+    location / {
+        root   /www/wg;
+        index  index.html index.htm;
+    }
 }
 
 server {
-	listen 8080; 
-	root /www/bw;
+     listen 8080;
+     location / {
+         root   /www/bw;
+         index  index.html index.htm;
+     }
 }
 ```
+
+![1568013146859](assets/1568013146859.png)
+
+
 
 
 
@@ -168,15 +183,19 @@ server {
 ```shell
 server {
 	listen 192.168.1.100:80; 
+	location / {
 	root /www/wg;
 	index index.html;
+	}
 }
 
 
 server {
-	listen 192.168.1.110:80; 
+	listen 192.168.1.110:80;
+	location / {
 	root /www/bw;
 	index index.html;
+	}
 }
 ```
 
@@ -190,15 +209,23 @@ server {
 server {
 	listen 80;
 	server_name www.wg.com;
-	root /www/wg;
+	location / {
+		root /www/wg;
+	}
 }
 
 server {
 	listen 80;
 	server_name www.bw.com;
-	root /www/bw;
+	location / {
+		root /www/bw;
+	}
 }
 ```
+
+![1568017616753](assets/1568017616753.png)
+
+
 
 
 
@@ -213,10 +240,10 @@ server {
 	listen 80; 
 	server_name www.wg.com;
 	location / {
-	root /www/wg;
-	index index.html index.htm;
-	auth_basic  "Please input your name: ";	#访问控制
-	auth_basic_user_file /usr/local/nginx/passwd.db;
+		root /www/wg;
+		index index.html index.htm;
+		auth_basic  "Please input your name: ";	#访问控制
+		auth_basic_user_file /usr/local/nginx/conf/nginxpasswd;
 	}
 } 
 
@@ -225,8 +252,8 @@ server {
 	listen 80;
 	server_name www.rg.com;
 	location / {
-	root /www/bw;
-	index index.html index.htm;
+		root /www/bw;
+		index index.html index.htm;
 	}
 }
 ```
@@ -235,7 +262,7 @@ server {
 
 ```
 useradd tom
-htpasswd -c /usr/local/nginx/conf/htpasswd tom
+htpasswd -c /usr/local/nginx/conf/nginxpasswd tom
 ```
 
 
