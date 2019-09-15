@@ -43,6 +43,8 @@ export JAVA_HOME=/usr/local/jdk1.8.0_60
 export PATH=$JAVA_HOME/bin:$JAVA_HOME/jre/bin:$PATH
 export CLASSPATH=.$CLASSPATH:$JAVA_HOME/lib:$JAVA_HOME/jre/lib:$JAVA_HOME/lib/tools.jar
 
+source /etc/profile
+
 [root@ c6s02 ~]# java -version
 java version "1.8.0_60"
 Java(TM) SE Runtime Environment (build 1.8.0_60-b27)
@@ -207,4 +209,13 @@ service httpd restart
 在浏览器访问 http://10.0.0.21:80/index.jsp，如果可以访问到 index.jsp 页面说明整合成
 功。
 ```
+
+
+
+
+
+## 12.4 apache与tomcat整合的好处和意义有
+
+- Apache处理静态页面的能力要远远高于tomcat，而Tomcat是java应用服务器，两者结合起来，可以更好的发挥各自的长处，实现页面的动静分离处理
+- 两者结合可以实现tomcat的负载均衡，有效提高系统的性能，、处理能力和效率 
 
