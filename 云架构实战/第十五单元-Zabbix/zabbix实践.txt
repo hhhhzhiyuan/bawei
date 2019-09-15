@@ -13,9 +13,11 @@ yum -y install mysql-server mysql
 安装php5.6和Apache服务
 
 #获取yum源
-rpm -ivh http://repo.webtatic.com/yum/el6/latest.rpm
-yum -y install httpd php56w php56w-gd php56w-mysqlnd php56w-bcmath php56w-mbstring php56w-xml php56w-ldap
+wget -O /etc/yum.repos.d/remi.repo http://rpms.famillecollet.com/enterprise/remi.repo
+yum -y install --enablerepo=remi --enablerepo=remi-php56 php php-opcache php-devel php-mbstring php-mcrypt php-mysqlnd php-phpunit-PHPUnit php-pecl-xdebug php-pecl-xhprof
 
+#安装apache
+yum -y install httpd
 
 vim /etc/httpd/conf/httpd.conf
 DirectoryIndex index.html index.html.var index.php
@@ -24,7 +26,10 @@ AddType application/x-httpd-php .php
 
 /etc/init.d/httpd restart
 /etc/init.d/mysqld restart
-	
+
+#设置mysql登录密码
+/usr/bin/mysqladmin -u root password '123456'
+
 
 2.安装zabbix源
 rpm -ivh https://mirrors.aliyun.com/zabbix/zabbix/3.5/rhel/7/x86_64/zabbix-release-3.5-1.el7.noarch.rpm
