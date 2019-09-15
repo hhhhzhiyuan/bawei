@@ -187,8 +187,6 @@ http://10.0.0.21/nagios/
 
 
 
-
-
 ## 14.5 Nagios主配置文件
 
 ```shell
@@ -216,21 +214,62 @@ Nagios定义监控时间模板的配置文件：/usr/local/nagios/etc/objects/ti
 Nagios定义变量的配置文件：/usr/local/nagios/etc/resource.cfg
 ```
 
-24.添加一个主机‘
-define host{ 				     	     #定义一个主机
-    use				linux-server       #引用一个模板
-	host_name		1605A		     #定义主机名
-	alias				1605A	         #定义主机别名
-	address		    192.168.189.120	 #主机的IP地址
-}
-
 
 
 ## 14.6 nagios被监控端部署（linux）
 
 
+监控另一台linux服务器
 
+(1)添加nagios用户
 
+```shell
+useradd -s /sbin/nologin nagios
+mkdir /usr/local/nagios
+chown -R nagios.nagios /usr/local/nagios
+```
+
+(2)安装nagios-plugins
+
+```shell
+wget https://nagios-plugins.org/download/nagios-plugins-2.1.4.tar.gz
+tar -zxvf nagios-plugins-2.1.4.tar.gz
+cd nagios-plugins-2.1.4
+./configure --prefix=/usr/local/nagios --with-nagios-user=nagios --with-nagios-group=nagios
+make
+make install
+```
+
+(3)安装NRPE
+
+```shell
+yum -y install gcc gcc-c++ openssl-devel xinetd
+wget http://prdownloads.sourceforge.net/sourceforge/nagios/nrpe-2.15.tar.gz
+tar -zxvf nrpe-2.15.tar.gz
+cd nrpe-2.15
+./configure --prefix=/usr/local/nagios
+make all
+make install-plugin
+make install-daemon
+make install-daemon-config
+make install-xinetd
+```
+
+(4) 配置NRPE
+
+```shell
+vim /usr/local/nagios/etc/nrpe.cfg
+allowed_hosts=10.0.0.21
+
+vim /etc/xinetd.d/nrpe
+only_from       = 10.0.0.21
+```
+
+(5)启动NRPE
+
+```shell
+/etc/init.d/xinetd restart
+```
 
 
 

@@ -97,7 +97,7 @@ http://10.0.0.21/nagios/
 
 
 ##nagios被监控端部署
-#1.监控另一台linux服务器
+#监控另一台linux服务器
 (1)添加nagios用户
 useradd -s /sbin/nologin nagios
 mkdir /usr/local/nagios
