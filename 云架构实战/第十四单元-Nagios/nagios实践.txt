@@ -47,12 +47,16 @@ chkconfig --list nagios
 
 #检查配置文件
 /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
-
+或
+/etc/init.d/nagios configtest
 
 #启动httpd和nagios
 /etc/init.d/httpd restart
 /etc/init.d/nagios restart
 
+#查看进程
+ps -ef|grep nagios
+ps -ef|grep httpd
 
 #3.在10.0.0.21上安装nagios-plugins
 wget https://nagios-plugins.org/download/nagios-plugins-2.1.4.tar.gz
@@ -83,9 +87,18 @@ allowed_hosts=127.0.0.1,10.0.0.21
 vim /etc/xinetd.d/nrpe
 only_from       = 127.0.0.1 10.0.0.21
 
+#配置/etc/services
+vim +429 /etc/services
+nrpe            5666/tcp
+nrpe            5666/udp
+
 
 #启动NRPE
 /etc/init.d/xinetd restart
+
+#启动httpd和nagios
+/etc/init.d/httpd restart
+/etc/init.d/nagios restart
 
 #测试nrpe效果
 /usr/local/nagios/libexec/check_nrpe -H 10.0.0.21 -c check_load
@@ -96,7 +109,7 @@ http://10.0.0.21/nagios/
 
 
 
-##nagios被监控端部署
+##nagios被监控端部署(10.0.0.22)
 #监控另一台linux服务器
 (1)添加nagios用户
 useradd -s /sbin/nologin nagios
@@ -130,13 +143,17 @@ allowed_hosts=10.0.0.21
 vim /etc/xinetd.d/nrpe
 only_from       = 10.0.0.21
 
+#配置/etc/services
+vim +429 /etc/services
+nrpe            5666/tcp
+nrpe            5666/udp
+
 #启动NRPE
 /etc/init.d/xinetd restart
 
 
 
-##在Nagios监控端上添加一台被监控的主机
-
+##在Nagios监控端10.0.0.21上添加一台被监控的主机
 (1)新增一个配置文件linux.cfg
 vim /usr/local/nagios/etc/nagios.cfg
 增加
@@ -144,7 +161,7 @@ cfg_file=/usr/local/nagios/etc/objects/linux.cfg
 
 
 (2)编辑新加主机的配置文件
-[root@ c6m01 ~]# vim /usr/local/nagios/etc/objects/linux.cfg
+vim /usr/local/nagios/etc/objects/linux.cfg
 
 define host{
         use                     linux-server
@@ -153,8 +170,13 @@ define host{
         address                 10.0.0.22
         }
 
+#修改属主属组
+chown -R nagios.nagios /usr/local/nagios/etc/objects/linux.cfg	
+		
 (3)检查语法并重启
 /usr/local/nagios/bin/nagios -v /usr/local/nagios/etc/nagios.cfg
+或者
+/etc/init.d/nagios configtest
 /etc/init.d/nagios restart
 
 
