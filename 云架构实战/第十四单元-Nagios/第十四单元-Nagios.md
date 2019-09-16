@@ -204,10 +204,10 @@ make install-xinetd
 
 ```
 vim /usr/local/nagios/etc/nrpe.cfg
-allowed_hosts=127.0.0.1,10.0.0.21
+allowed_hosts=10.0.0.21
 
 vim /etc/xinetd.d/nrpe
-only_from       = 127.0.0.1 10.0.0.21
+only_from       = 10.0.0.21
 ```
 
 #配置/etc/services
@@ -326,6 +326,8 @@ make install-xinetd
 ```
 
 (4) 配置NRPE
+
+注意：此处的ip为nagios服务端的ip
 
 ```shell
 vim /usr/local/nagios/etc/nrpe.cfg
