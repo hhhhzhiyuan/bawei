@@ -14,7 +14,7 @@ yum -y install mysql-server mysql
 
 #获取yum源
 wget -O /etc/yum.repos.d/remi.repo http://rpms.famillecollet.com/enterprise/remi.repo
-yum -y install --enablerepo=remi --enablerepo=remi-php56 php php-opcache php-devel php-mbstring php-mcrypt php-mysqlnd php-phpunit-PHPUnit php-pecl-xdebug php-pecl-xhprof
+yum -y install --enablerepo=remi --enablerepo=remi-php56 php php-ldap php-bcmath php-odbc php-pear php-xml php-xmlrpc php-mhash libjpeg* php-mysql php-gd php-mbstring
 
 #安装apache
 yum -y install httpd
@@ -34,14 +34,14 @@ AddType application/x-httpd-php .php
 2.安装zabbix-4.0
 https://www.zabbix.com/download?zabbix=4.0&os_distribution=centos&os_version=6&db=mysql
 
-配置zabbix源
+#配置zabbix源
 rpm -Uvh https://repo.zabbix.com/zabbix/4.0/rhel/6/x86_64/zabbix-release-4.0-2.el6.noarch.rpm
 yum clean all
 
-安装Zabbix server, frontend, agent
+#安装Zabbix server, frontend, agent
 yum -y install zabbix-server-mysql zabbix-web-mysql zabbix-agent
 
-初始化mysql数据库
+#初始化mysql数据库
 mysql -uroot -p123456
 
 mysql> create database zabbix character set utf8 collate utf8_bin;
@@ -51,13 +51,38 @@ mysql> quit;
 zcat /usr/share/doc/zabbix-server-mysql*/create.sql.gz | mysql -uzabbix -p123456 zabbix
 
 
+3.编辑zabbix-server配置文件，配置数据库
+[root@localhost ~]# vim /etc/zabbix/zabbix_server.conf
+DBHost=localhost
+DBName=zabbix
+DBUser=zabbix
+DBPassword=123456
 
 
 
+/etc/init.d/httpd restart
+/etc/init.d/zabbix-server restart
+/etc/init.d/zabbix-agent restart
 
 
+mkdir -p /var/www/html/zabbix
+cp -a /usr/share/zabbix/* /var/www/html/zabbix/
 
 
+vim /etc/php.ini 
+post_max_size = 16M
+max_execution_time = 300
+max_input_time = 300
+date.timezone = Asia/Shanghai
+always_populate_raw_post_data = -1
+
+
+/etc/init.d/httpd restart
+
+
+http://10.0.0.20/zabbix/
+默认用户名：Admin 
+密码：zabbix
 
 
 
