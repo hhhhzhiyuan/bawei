@@ -93,9 +93,10 @@ yum clean all
 yum -y install zabbix-server-mysql zabbix-web-mysql zabbix-agent
 ```
 
-**#设置开机自启zabbix-server，zabbix-agent**
+**#启动并设置开机自启zabbix-server，zabbix-agent**
 
 ```shell
+systemctl restart zabbix-server zabbix-agent
 systemctl enable zabbix-server zabbix-agent
 ```
 
