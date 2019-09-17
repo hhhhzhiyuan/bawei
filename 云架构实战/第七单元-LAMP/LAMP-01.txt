@@ -3,7 +3,7 @@ LAMP
 
 
 #Centos yum安装保存rpm到本地
-sed -i "s/keepcache=0/keepcache=1/g" /etc/yum.conf
+sed -i "s/keepcache=.*/keepcache=1/g" /etc/yum.conf
 
 #清理yum缓存
 yum clean all

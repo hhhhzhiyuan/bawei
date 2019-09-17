@@ -34,10 +34,10 @@
 
 ## 15.4 实验环境
 
-| 主机                | 操作系统  | IP地址    | 主要软件                                                    |
-| ------------------- | --------- | --------- | ----------------------------------------------------------- |
-| zabbix-server服务端 | centos6.8 | 10.0.0.21 | httpd, php5.6, mysql5.6, zabbix-server4.0,  zabbix-agent4.0 |
-| zabbix-agent客户端  | centos6.8 | 10.0.0.22 | zabbix-server4.0,  zabbix-agent4.0                          |
+| 主机                | 操作系统 | IP地址    | 主要软件                                              |
+| ------------------- | -------- | --------- | ----------------------------------------------------- |
+| zabbix-server服务端 | centos7  | 10.0.0.41 | httpd, php5.6, mysql5.6, zabbix-server,  zabbix-agent |
+| zabbix-agent客户端  | centos7  | 10.0.0.42 | zabbix-server,  zabbix-agent                          |
 
 
 
@@ -45,75 +45,58 @@
 
 ### 15.5.1 搭建LAMP环境
 
-zabbix需要mysql 5.6以上版本，删除旧的版本
-
-```shell
-yum -y remove mysql*
+```
+yum -y install httpd mariadb mariadb-server php php-mysql php-gd
 ```
 
-下载MySQL5.6版本并安装
+**#整合apache和php**
 
-```shell
-rpm -ivh http://dev.mysql.com/get/mysql-community-release-el6-5.noarch.rpm
-yum -y install mysql-server mysql
 ```
-
-
-安装php5.6和Apache服务
-
-#获取yum源
-
-```shell
-wget -O /etc/yum.repos.d/remi.repo http://rpms.famillecollet.com/enterprise/remi.repo
-yum -y install --enablerepo=remi --enablerepo=remi-php56 php php-ldap php-bcmath php-odbc php-pear php-xml php-xmlrpc php-mhash libjpeg* php-mysql php-gd php-mbstring
-```
-
-#安装apache
-
-```shell
-yum -y install httpd
-```
-
-#整合apache和php
-
-```shell
 vim /etc/httpd/conf/httpd.conf
-DirectoryIndex index.html index.html.var index.php
+DirectoryIndex index.html index.php
 AddType application/x-httpd-php .php
 ```
 
-#重启httpd和mysql
+**#启动Apache和MariaDB并查**看
 
-```shell
-/etc/init.d/httpd restart
-/etc/init.d/mysqld restart
+```
+systemctl start httpd mariadb
+systemctl status httpd mariadb
 ```
 
-#设置mysql登录密码
+**#将服务设置为开机自动启动**
 
-```shell
+```
+systemctl enable httpd mariadb
+```
+
+**#设置mariadb登录密码**
+
+```
 /usr/bin/mysqladmin -u root password '123456'
 ```
 
 
 
-### 15.5.2 安装zabbix-4.0
+### 15.5.2 安装zabbix
 
-官网安装地址
-
-https://www.zabbix.com/download?zabbix=4.0&os_distribution=centos&os_version=6&db=mysql
-
-#配置zabbix源
+**#配置zabbix源**
 
 ```shell
-rpm -Uvh https://repo.zabbix.com/zabbix/4.0/rhel/6/x86_64/zabbix-release-4.0-2.el6.noarch.rpm
+rpm -ivh https://mirrors.aliyun.com/zabbix/zabbix/3.5/rhel/7/x86_64/zabbix-release-3.5-1.el7.noarch.rpm
 yum clean all
 ```
 
-#安装Zabbix server, frontend, agent
+**#安装Zabbix server, frontend, agent**
 
-```
+```shell
 yum -y install zabbix-server-mysql zabbix-web-mysql zabbix-agent
+```
+
+**#设置开机自启zabbix-server，zabbix-agent**
+
+```shell
+systemctl enable zabbix-server zabbix-agent
 ```
 
 
@@ -139,7 +122,7 @@ vim /etc/zabbix/zabbix_server.conf
 DBHost=localhost
 DBName=zabbix
 DBUser=zabbix
-DBPassword=123456
+DBPassword=123456	#只修改此处
 ```
 
 
@@ -153,23 +136,78 @@ cp -a /usr/share/zabbix/* /var/www/html/zabbix/
 
 
 
+### 15.5.6 重启httpd，zabbix-server，zabbix-agent
+
+```
+systemctl restart httpd zabbix-server zabbix-agent
+```
 
 
 
 
-5.4.1zabbix-agent
-15.4.2和zabbix-server
-15.5Zabbx-server的安装
-15.4.1Zabbx-server的安装
-15.4.2Zabbx-server的配置
-15.6Zabbx的测试使用
-15.7Zabbix
-15.8Zabbx配置邮件报警
-15.9综合案例考核
+
+### 15.5.7 访问zabbix页面
+
+```shell
+http://10.0.0.41/zabbix/
+
+默认用户名：Admin 
+密码：zabbix
+```
+
+
+
+![1568705020421](assets/1568705020421.png)
 
 
 
 
+
+![1568705050617](assets/1568705050617.png)
+
+页面会出现部分参数，failed，需要调整一下参数：
+
+```
+vim /etc/php.ini 
+date.timezone = Asia/Shanghai
+```
+
+重启httpd
+
+```
+systemctl restart httpd
+```
+
+
+然后刷新http://10.0.0.41/zabbix/页面，报错消失。
+
+
+
+![1568705199734](assets/1568705199734.png)
+
+![1568705225006](assets/1568705225006.png)
+
+
+
+![1568705243633](assets/1568705243633.png)
+
+![1568705269528](assets/1568705269528.png)
+
+![1568705318524](assets/1568705318524.png)
+
+
+
+### 15.5.8 更改zabbix为中文
+
+
+
+
+
+![1568705421305](assets/1568705421305.png)
+
+
+
+![1568705399600](assets/1568705399600.png)
 
 
 
