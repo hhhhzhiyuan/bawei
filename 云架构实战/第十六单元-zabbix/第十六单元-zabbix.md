@@ -352,9 +352,11 @@ sh /usr/lib/zabbix/alertscripts/sendEmail.sh  接收邮件的邮箱  标题 内�
 
 ![1568786049271](assets/1568786049271.png)
 
+启用激活 
+
+![1568794171956](assets/1568794171956.png)
 
 
-![1568786309475](assets/1568786309475.png)
 
 测试，监控一个apache服务把服务停掉，看看是否能够收到邮件
 
@@ -366,13 +368,78 @@ sh /usr/lib/zabbix/alertscripts/sendEmail.sh  接收邮件的邮箱  标题 内�
 
 
 
+## 16.4 zabbix+grafana
+
+grafana和zabbix-server安装在一台机器（10.0.0.41）
+
+### 16.4.1 安装grafana
+
+```
+wget <https://dl.grafana.com/oss/release/grafana-6.3.5-1.x86_64.rpm> 
+sudo yum -y localinstall grafana-6.3.5-1.x86_64.rpm 
+
+systemctl daemon-reload
+systemctl enable grafana-server
+systemctl start grafana-server
+```
+
+### 16.4.2 安装grafana-zabbix插件
+
+```bash
+grafana-cli plugins install alexanderzobnin-zabbix-app
+systemctl restart grafana-server
+```
+
+### 16.4.3 Web端访问3000端口
+
+**1.http://10.0.0.41:3000**
+
+![1568799928067](assets/1568799928067.png)
 
 
-16.4Zabbix 监控cpu，内存
-16.5Zabbix 监控MySQL 各项指标
-16.6Zabbix 监控pv uv 
-16.7Zabbix + Grafana
-16.8Openfalcon监控 的安装及使用
+
+```
+用户名：admin
+密  码：admin 
+```
+
+**2.初次登陆需要修改登陆密码：**
+
+![1568800013008](assets/1568800013008.png)
+
+
+
+**3.启用zabbix插件**
+
+![1568800183400](assets/1568800183400.png)
+
+
+
+**4.点击配置，选择data sources 的zabbix APP进行配置http://10.0.0.41/zabbix/api_jsonrpc.php**
+
+![1568800416328](assets/1568800416328.png)
+
+
+
+
+
+**5.去官网找合适的模板去导入**
+
+https://grafana.com/grafana/dashboards
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
