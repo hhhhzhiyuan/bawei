@@ -10,12 +10,6 @@
 
 
 
-
-
-
-
-
-
 ## 16.1 创建主机
 
 ### 16.1.1 创建主机前提及步骤
@@ -46,6 +40,8 @@ Server=10.0.0.41		#修改此处为zabbix-server的ip
 ServerActive=10.0.0.41	#修改此处为zabbix-server的ip
 Hostname=apache			#自己定义，一般和主机名相同
 Include=/etc/zabbix/zabbix_agentd.d/*.conf
+
+systemctl restart zabbix-agent
 ```
 
 
@@ -86,7 +82,7 @@ configuration（配置）–>Hosts（主机）–>Create host（创建主机）
 
 
 
-### 16.1.2 为主机链接自定义监控模板
+### 16.1.2 为主机链接监控模板
 
 
 
@@ -131,8 +127,8 @@ zabbix_get -s 10.0.0.42 -k net.tcp.listen[80]
 0
 ```
 
-若返回值是1的话，说明Apache端口正在监听
-若返回值是0的话，说明Apache端口没有监听
+若返回值是1的话，说明Apache端口正在监听，也就是httpd服务是运行。
+若返回值是0的话，说明Apache端口没有监听，也就是httpd服务是未运行。
 
 
 
@@ -146,15 +142,232 @@ zabbix_get -s 10.0.0.42 -k net.tcp.listen[80]
 
 
 
+![1568768009561](assets/1568768009561.png)
+
+
+
+![1568768067783](assets/1568768067783.png)
 
 
 
 
 
 
-16.1.3为监控项添加图形
-16.2为动作添加关联触发器
-16.3配置邮件、微信报警
+
+
+
+### 16.1.5 为监控项添加图形
+
+![1568768126317](assets/1568768126317.png)
+
+
+
+![1568768160308](assets/1568768160308.png)
+
+
+
+![1568768241351](assets/1568768241351.png)
+
+
+
+### 16.1.6 查看监控图形
+
+![1568768489181](assets/1568768489181.png)
+
+
+
+![1568778591111](assets/1568778591111.png)
+
+
+
+
+
+### 16.1.7 解决zabbix图形中文显示乱码
+
+**1.中文乱码**
+
+![1568776059231](assets/1568776059231.png)
+
+
+
+![1568705421305](assets/1568705421305.png)
+
+![1568705399600](assets/1568705399600.png)
+
+
+
+**2.将windows目录C:\Windows\Fonts\楷体 常规 拷贝到/usr/share/zabbix/fonts/下**
+
+![1568787924713](assets/1568787924713.png)
+
+![1568787980653](assets/1568787980653.png)
+
+windows10系统，需要将上传的楷体常规字体SIMKAI.TTF，改名为小写simkai.ttf
+
+```
+mv SIMKAI.TTF simkai.ttf
+```
+
+**3.修改配置文件defines.inc.php**
+
+```shell
+vim /usr/share/zabbix/include/defines.inc.php
+
+define('ZBX_GRAPH_FONT_NAME',           'simkai');   #修改此处为msyh
+define('ZBX_FONT_NAME', 'simkai');		#修改此处为msyh
+```
+
+**4.刷新网页**
+
+![1568776257610](assets/1568776257610.png)
+
+
+
+### 16.1.8 打开zabbix前端报警
+
+![1568768602800](assets/1568768602800.png)
+
+
+
+
+
+
+
+## 16.2为动作添加关联触发器
+
+
+
+
+
+
+
+
+
+
+
+## 16.3 配置邮件、微信报警
+
+**注意：发送邮件微信报警的前提是能连外网。**
+
+
+
+### 16.3.1 配置邮件报警（服务端配置）
+
+**1．解压sendmail程序的压缩包，并复制到/usr/local/bin**
+
+```
+tar -zxvf sendEmail-v1.56.tar.gz
+cp sendEmail-v1.56/sendEmail /usr/local/bin/
+```
+
+**2.上传sendEmail.sh到服务器并增加可执行权限**
+
+```
+cp sendEmail.sh /usr/lib/zabbix/alertscripts
+chmod -R 777 /usr/lib/zabbix/alertscripts/sendEmail.sh
+```
+
+**3.编辑脚本，将绑定的邮箱地址和密码写上**
+
+```
+vim  /usr/lib/zabbix/alertscripts/sendEmail.sh
+```
+
+![1568783802973](assets/1568783802973.png)
+
+设置163邮箱授权码
+
+![1568790785895](assets/1568790785895.png)
+
+
+
+
+
+**4.测试脚本**
+
+```
+sh /usr/lib/zabbix/alertscripts/sendEmail.sh  接收邮件的邮箱  标题 内容
+```
+
+去邮箱查看是否收到了邮件
+
+![1568784377378](assets/1568784377378.png)
+
+**5. zabbix创建报警媒介**
+
+![1568784461473](assets/1568784461473.png)
+
+
+
+![1568784625277](assets/1568784625277.png)
+
+```
+名称：sendmail
+
+类型：脚本
+
+脚本名称：sendEmail.sh
+
+脚本参数：       //新增以下三个参数
+
+{ALERT.SENDTO}
+
+{ALERT.SUBJECT}
+
+{ALERT.MESSAGE}
+```
+
+
+
+**关联报警用户和媒介**
+
+![1568784714389](assets/1568784714389.png)
+
+![1568784776598](assets/1568784776598.png)
+
+![1568784827009](assets/1568784827009.png)
+
+![1568784881135](assets/1568784881135.png)
+
+
+
+![1568784943869](assets/1568784943869.png)
+
+
+
+![1568785329283](assets/1568785329283.png)
+
+
+
+```
+告警主机 : {HOST.NAME}
+告警  IP   : {HOST.IP}
+告警时间 : {EVENT.DATE}-{EVENT.TIME}
+告警等级 : {TRIGGER.SEVERITY}
+告警信息 : {TRIGGER.NAME}:{ITEM.VALUE}
+事件  ID   : {EVENT.ID}
+```
+
+
+
+![1568786049271](assets/1568786049271.png)
+
+
+
+![1568786309475](assets/1568786309475.png)
+
+测试，监控一个apache服务把服务停掉，看看是否能够收到邮件
+
+在报表菜单的动作日志下面可以查看邮件发送的状态
+
+![1568786393233](assets/1568786393233.png)
+
+
+
+
+
+
+
 16.4Zabbix 监控cpu，内存
 16.5Zabbix 监控MySQL 各项指标
 16.6Zabbix 监控pv uv 
