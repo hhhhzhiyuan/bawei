@@ -41,6 +41,7 @@ ServerActive=10.0.0.41	#修改此处为zabbix-server的ip
 Hostname=apache			#自己定义，一般和主机名相同
 Include=/etc/zabbix/zabbix_agentd.d/*.conf
 
+systemctl enable zabbix-agent
 systemctl restart zabbix-agent
 ```
 
@@ -147,10 +148,6 @@ zabbix_get -s 10.0.0.42 -k net.tcp.listen[80]
 
 
 ![1568768067783](assets/1568768067783.png)
-
-
-
-
 
 
 
