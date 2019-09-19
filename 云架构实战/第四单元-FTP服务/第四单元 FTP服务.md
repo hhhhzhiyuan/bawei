@@ -28,14 +28,6 @@ FTP软件：**vsftpd**,wu-ftp,proftp等
 
 
 
-
-
-
-
-
-
-
-
 ### 4.1.1 FTP两种工作模式及原理
 
 ftp协议的连接方式有两种，一种是命令连接，一种是数据连接，而ftp的数据连接模式也有两种，一种是主动模式，一种是被动模式。
@@ -89,21 +81,11 @@ FTP客户端连接到FTP服务器的21端口→发送用户名和密码登录，
 
 
 
-#安装客户端
-
-yum install -y ftp
-
-#连接服务端10.0.0.21
-
-ftp 10.0.0.21
-
-
-
 #### 4.1.2.2 安装vsftpd服务端和客户端
 
 ```shell
 yum install -y vsftpd   #服务端
-yum install -y ftp		#客户端
+yum install -y lftp		#客户端
 /etc/init.d/vsftpd start
 chkconfig vsftpd on
 
@@ -343,8 +325,6 @@ exit 		退出ftp
 3. lftp第三方ftp客户端，可以进行目录操作
 
 ![1567869702118](assets/1567869702118.png)
-
-
 
 
 

@@ -64,10 +64,6 @@ vim /etc/httpd/conf/httpd.conf
 
 
 
-
-
-
-
 ## 6.2 基于IP的虚拟主机
 
 ### 6.2.1 配置基于IP的虚拟主机
@@ -127,10 +123,6 @@ this is bw
 this is wg
 
 ```
-
-
-
-
 
 
 
