@@ -1,0 +1,424 @@
+第一单元--sshd+telnet+vnc
+#sshd
+安装
+yum -y install openssh*
+
+重启
+/etc/init.d/sshd restart
+
+启动
+/etc/init.d/sshd start
+
+停止
+/etc/init.d/sshd stop
+
+生成秘钥（三次回车）
+ssh-keygen
+
+免秘钥登录
+ssh-copy-id  root@10.0.0.22
+
+连接分发秘钥那台服务器
+ssh 10.0.0.22
+
+修改对方服务器端口，通过-p，指定端口登录
+vim /etc/ssh/sshd_config
+Port 52122
+
+/etc/init.d/sshd restart
+
+ssh -p 52122 10.0.0.22 #通过-p指定端口
+
+
+#telnet
+安装
+yum -y install  telnet-server telnet
+
+修改telnet配置文件
+vim /etc/xinetd.d/telnet
+disable         = no
+
+启动
+/etc/init.d/xinetd restart
+
+查看端口
+netstat -lntp |grep 23 
+
+#vnc
+安装
+yum -y install tigervnc-server
+
+配置文件添加一个用户
+vim /etc/sysconfig/vncservers
+VNCSERVERS="1:root 2:tom"
+
+创建用户并设置密码
+useradd tom  #创建用户
+su - tom	 #切换到用户
+vncpasswd	 #给vnc用户生成密码
+
+启动
+/etc/init.d/vncserver restart
+
+添加开机自启
+chkconfig  vncserver on
+
+
+#fail2ban防止暴力破解
+安装
+yum install fail2ban -y
+
+
+第二三单元--DNS
+安装
+yum -y install bind
+#启动
+/etc/init.d/named restart
+#添加开机自启    	
+chkconfig named on
+#查看bind端口
+ss -lntp|grep named
+
+域名解析常见命令
+#安装dig nslookup
+yum -y install bind-utils
+
+
+正向解析-A记录
+反向解析-PTR记录
+别名-CNAME记录
+
+第四单元--FTP
+安装
+yum install -y vsftpd   #服务端
+yum install -y lftp		#客户端
+
+配置文件
+vim /etc/vsftpd/vsftpd.conf 
+
+anon_upload_enable=YES 			#启用匿名用户上传文件的功能（文件夹不成）
+anon_mkdir_write_enable=YES 	#开放匿名用户写和创建目录的权限（管理员权限）
+anon_other_write_enable=YES 	#允许匿名用户重命名，删除
+max_clients=50      #设置vsftpd允许的最大连接数，默认值为0，表示不受限制。 
+max_per_ip=10 		#设置每个IP允许与FTP服务器同时建立连接的数目。默认值为0，表示不受限制。
+anon_max_rate=10M 	#设置匿名登入者使用的最大传输速度，单位为B/s，0表示不限制速度。默认值为0。 
+local_max_rate=10M 	#本地用户使用的最大传输速度，单位为B/s，0表示不限制速度。预设值为0。 
+
+启动
+/etc/init.d/vsftpd restart
+
+端口
+20--数据端口
+21--命令控制端口
+
+
+第五单元--apache
+
+安装
+yum -y install httpd	
+
+启动
+/etc/init.d/httpd restart
+
+添加开机自启
+chkconfig httpd on
+
+主配置文件及主要参数
+/etc/httpd/conf/httpd.conf
+Listen 80						#监听80端口
+MaxClients  256					#指定同时能访问服务器的客户机数量为256
+DocumentRoot "/var/www/html"	#网页文件存放的目录
+DirectoryIndex index.html index.html.var	#默认网站主页
+ServerName www.wg.com			#域名
+
+第六单元--apache虚拟主机
+
+启用虚拟主机的准备
+
+#禁用默认的主机模式
+vim /etc/httpd/conf/httpd.conf
+注释下面这行内容
+#DocumentRoot "/var/www/html"
+
+
+配置虚拟主机操作
+
+基于ip的虚拟主机
+添加ip
+ip addr add 10.0.0.30/24 dev eth0
+
+基于端口的虚拟主机
+vim /etc/httpd/conf/httpd.conf
+Listen 8090
+Listen 80
+
+配置基于域名的虚拟主机
+ServerName    www.wg.com
+
+####创建目录
+mkdir -p /var/www/bw
+mkdir -p /var/www/wg
+
+####创建测试文件
+echo 'this is bw' >>/var/www/bw/index.html
+echo 'this is wg' >>/var/www/wg/index.html
+
+cat >/etc/httpd/conf.d/virtualhost.conf<<EOF
+#基于域名拟主机配置
+<VirtualHost 10.0.0.21:80>
+  DocumentRoot "/var/www/bw"
+  ServerName    www.bw.com
+</VirtualHost>
+
+<VirtualHost 10.0.0.30:80>
+  DocumentRoot "/var/www/wg"
+  ServerName    www.wg.com
+</VirtualHost>
+
+#基于IP的虚拟主机配置
+<VirtualHost 10.0.0.21:80>
+  DocumentRoot "/var/www/bw"
+</VirtualHost>
+
+<VirtualHost 10.0.0.30:80>
+  DocumentRoot "/var/www/wg"
+</VirtualHost>
+
+
+#基于端口的虚拟主机配置
+<VirtualHost 10.0.0.21:8090>
+  DocumentRoot "/var/www/bw"
+</VirtualHost>
+EOF
+
+绑定本地hosts
+vim /etc/hosts
+127.0.0.1   localhost localhost.localdomain localhost4 localhost4.localdomain4
+::1         localhost localhost.localdomain localhost6 localhost6.localdomain6
+10.0.0.21 www.bw.com
+10.0.0.30 www.wg.com
+
+
+
+# 下载nginx安装包并安装
+wget http://nginx.org/download/nginx-1.12.2.tar.gz
+yum -y install gcc gcc-c++ pcre-devel openssl-devel openssl wget
+tar -zxvf nginx-1.12.2.tar.gz
+cd nginx-1.12.2
+./configure --prefix=/usr/local/nginx
+make
+make install
+/usr/local/nginx/sbin/nginx
+
+#添加开机自启
+echo '/usr/local/nginx/sbin/nginx' >>/etc/rc.local
+
+
+#安装jdk==java环境
+tar -zxvf jdk-8u60-linux-x64.tar.gz -C /usr/local/
+chown -R root.root /usr/local/jdk1.8.0_60
+
+vim /etc/profile
+export JAVA_HOME=/usr/local/jdk1.8.0_60
+export PATH=$JAVA_HOME/bin:$JAVA_HOME/jre/bin:$PATH
+export CLASSPATH=.$CLASSPATH:$JAVA_HOME/lib:$JAVA_HOME/jre/lib:$JAVA_HOME/lib/tools.jar
+
+source /etc/profile
+java -version
+
+#安装tomcat
+tar -zxvf apache-tomcat-7.0.47.tar.gz
+mkdir -p /opt/tomcat01
+cp -a apache-tomcat-7.0.47/* /opt/tomcat01/
+
+#启动tomcat01
+cd /opt/tomcat01/
+./bin/startup.sh
+
+#关闭tomcat01
+cd /opt/tomcat01/
+./bin/shutdown.sh
+或者
+kill -9 pid号
+
+
+
+#apache负载到tomcat
+#创建tomcat02另一个节点
+cd /opt/
+cp -a tomcat01 tomcat02
+vim tomcat02/conf/server.xml
+此处修改这三处的端口
+<Server port="18005" shutdown="SHUTDOWN">
+<Connector port="18080" protocol="HTTP/1.1"
+<Connector port="18009" protocol="AJP/1.3" redirectPort="8443" />
+
+
+##10.0.0.21--httpd--负载均衡-操作##
+
+#1.使用 yum 安装 Apache
+yum -y install httpd httpd-devel
+
+#2.安装提供 通过 uri 路径来区分客户端访问页面类型的模块(mod_jk模块也叫连接器)
+tar -xzvf jakarta-tomcat-connectors-1.2.15-src.tar.gz
+cd jakarta-tomcat-connectors-1.2.15-src/jk/native/
+yum -y install gcc gcc-c++
+./configure --with-apxs=/usr/sbin/apxs
+make
+make install
+
+#3.查看 mod_jk.so 是否已经存在（出现以下显示安装成功）
+ls /etc/httpd/modules/mod_jk.so
+显示如下
+/etc/httpd/modules/mod_jk.so
+
+
+#4.生成 mod_jk 的配置文件
+cd /root/jakarta-tomcat-connectors-1.2.15-src/jk/conf
+\cp workers.properties.minimal /etc/httpd/conf/workers.properties
+
+#5.删除 workers.properties 里面用不到的内容，再添加以下内容
+vim /etc/httpd/conf/workers.properties
+
+worker.list=wlb
+
+#Tomcat01
+worker.ajp13w.type=ajp13
+worker.ajp13w.host=10.0.0.21
+worker.ajp13w.port=8009
+
+#Tomcat02
+worker.ajp14w.type=ajp13
+worker.ajp14w.host=10.0.0.21
+worker.ajp14w.port=18009
+
+worker.wlb.type=lb
+worker.wlb.balance_workers=ajp13w,ajp14w
+
+
+worker.jkstatus.type=status
+
+#6.整合Apache和tomcat配置文件
+vim /etc/httpd/conf/httpd.conf 
+在 DirectoryIndex 参数那添加 index.jsp
+
+在配置文件最后一行添加
+LoadModule jk_module modules/mod_jk.so
+JkWorkersFile /etc/httpd/conf/workers.properties
+JkMount /*.jsp wlb
+
+#7.手动创建测试页并测试
+echo 'this is tomcat01' >/opt/tomcat01/webapps/ROOT/index.jsp
+echo 'this is tomcat02' >/opt/tomcat02/webapps/ROOT/index.jsp
+curl  10.0.0.21:8080/index.jsp
+curl  10.0.0.21:18080/index.jsp
+
+#8.重启ahache
+service httpd restart
+浏览器访问apahce的地址：
+http://10.0.0.21/index.jsp
+
+
+
+
+
+
+
+
+
+####nginx负载到tomcat####
+
+#1.安装nginx(10.0.0.21)
+yum或编译安装方式均可，可参考第九单元。
+
+yum -y install gcc gcc-c++ pcre-devel openssl-devel openssl wget
+wget http://nginx.org/download/nginx-1.12.2.tar.gz
+tar -zxvf nginx-1.12.2.tar.gz
+cd nginx-1.12.2
+./configure --prefix=/usr/local/nginx
+make
+make install
+
+/usr/local/nginx/sbin/nginx
+
+
+#2.部署tomcat(两个节点)(10.0.0.22)
+参考第十二单元。
+
+
+
+#3.通过Nginx和Tomcat结合
+修改Nignx配置文件
+vim /usr/local/nginx/conf/nginx.conf
+
+
+在HTTP模块中添加：
+upstream tomcat {     #定义服务器组tomcat
+    server 10.0.0.22:8080;    #定义后Tomcat端服务器
+    server 10.0.0.22:18080;
+}
+
+
+在server模块中添加：
+location ~ \.jsp$ {   #URL正则匹配，匹配jsp结尾的所有URL
+	proxy_pass   http://tomcat;   #proxy_pass反向代理参数，将匹配到的请求反向代理到tomcat服务器组！
+}
+
+
+重动nginx并测试
+注意：先关闭apahce
+
+
+#LAMP环境搭建论坛
+#安装
+yum install mysql mysql-server php php-mysql httpd -y
+
+#Apache默认支持html,整合php和Apache
+#编辑apache的配置文件
+vim /etc/httpd/conf/httpd.conf
+主页支持php
+
+402 DirectoryIndex index.php index.html index.html.var
+781 AddType application/x-httpd-php .php
+
+#重启httpd
+/etc/init.d/httpd restart
+
+#创建php测试页
+vim /var/www/html/index.php
+内容：
+<?php
+phpinfo();
+?>
+
+#启动数据库
+service mysqld restart
+
+#设置mysql登录密码
+#mysqladmin -u root password '123456'
+
+#将论坛的安装包上传到服务器并解压
+#安装解压工具：
+yum -y install unzip
+解压
+unzip Discuz_X3.3_SC_UTF8.zip
+
+\cp -a upload/* /var/www/html
+chmod 777 -R /var/www/html/*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
